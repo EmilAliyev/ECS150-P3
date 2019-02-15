@@ -3,4 +3,8 @@ lib := libuthread.a
 
 all: $(lib)
 
-## TODO: Phase 1 and Phase 2
+sem.o : sem.c
+	gcc -Wall -Werror -c sem.c -o sem.o
+
+libuthread.a : sem.o
+	ar rcs libuthread.a sem.o queue.o thread.o

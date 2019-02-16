@@ -1,6 +1,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 
+#include <stdio.h>
+
 #include "queue.h"
 #include "sem.h"
 #include "thread.h"
@@ -49,20 +51,24 @@ int sem_down(sem_t sem)
 		return -1;
 	}
 
-	//maybe make this a crit section? so that check isn't interrupted after it's made?
-
+	//crit section so that if else isn't interupted. Probably could be more precise. 
+	enter_critical_section();
+	
 	//take from resource pile if resources are availible 
 	if(sem->count != 0){
 		sem->count -= 1;
 	}
 	else{
-		//pthread_self https://piazza.com/class/jqmqktp98ox44m?cid=302
-		
+		//pthread_self comes from https://piazza.com/class/jqmqktp98ox44m?cid=302
 		long unsigned int tid = pthread_self();
 
+		//Enqueue blocked tid
 		queue_enqueue(sem->waitlist, &tid);
 		thread_block();
+		
 	}
+
+	exit_critical_section();
 
 	return 0;
 }
@@ -74,18 +80,44 @@ int sem_up(sem_t sem)
 		return -1;
 	}
 
-	//lets make this a crit section also
+	enter_critical_section();
 
 	//add resource back to pile
 	sem->count += 1;
+
 	if(queue_length(sem->waitlist) != 0){
+	
+		sem->count -= 1;
+
+		//dequeue and unblock 
+		void* tid = malloc(sizeof(int*));
+
+		queue_dequeue(sem->waitlist, &tid);
+		thread_unblock(*(long unsigned int *)tid);
 	}
 
+	exit_critical_section();
+	
 	return 0;
 }
 
 int sem_getvalue(sem_t sem, int *sval)
 {
+	if(sem == NULL || sval == NULL){
+		return -1;
+	}
+
+	int val;
+
+	if(queue_length(sem->waitlist) > 0){
+		val = queue_length(sem->waitlist);
+		sval = &val;
+	}
+	else{
+		val = sem->count;
+		sval = &val;
+	}
+
 	return 0;
 }
 

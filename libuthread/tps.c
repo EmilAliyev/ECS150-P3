@@ -38,7 +38,7 @@ static queue_t tpsqueue; //Store the tpses
 //returns 1 if tid passed in matches data tid, returns 0 otherwise
 static int findTid(void *data, void *arg)
 {
-	struct tps* tps = (struct tps *)data;
+	tps_t tps = (tps_t) data;
 	long unsigned int tid = tps->tid;
 	long unsigned int match = *(long unsigned int *)arg;
 
@@ -53,7 +53,7 @@ static tps_t findCurrentTPS()
 {
 	unsigned long int tid = pthread_self();
 
-	struct tps* ptr = NULL;
+	tps_t ptr = NULL;
 
 	queue_iterate(tpsqueue, findTid, (void *)tid, (void**)&ptr);
 
@@ -67,6 +67,8 @@ int tps_init(int segv)
 	/*
 	Phase 2.1: Do nothing
 	*/
+
+	//initialize global queue
 	tpsqueue = queue_create();
 
 	return 0;
@@ -87,11 +89,16 @@ int tps_create(void)
 	
 	//need to check if tps is already allocated
 
-	struct tps* new_tps = malloc(sizeof(struct tps));
+	//malloc tps
+	tps* new_tps = malloc(sizeof(struct tps));
 
+	//set tid to current tid
 	new_tps->tid = pthread_self();
+
+	//nmap allocates mempage 
 	//new_tps->mem = mmap(args);
 	
+	//enqueue tps
 	queue_enqueue(tpsqueue, new_tps);
 
 	return 0;
@@ -108,12 +115,18 @@ int tps_destroy(void)
 	2. Deallocate memory page
 	3. Deallocate tps
 	*/
-	
-	struct tps* tps = findCurrentTPS();
 
+	//get tps pointer for current thread	
+	tps_t tps = findCurrentTPS();
+
+	//free pointer to mem
+
+	//remove from queue
 	int val = queue_delete(tpsqueue, tps);
 	if (val != 0)
 		return -1;
+
+	//free tps
 
 	return 0;
 }

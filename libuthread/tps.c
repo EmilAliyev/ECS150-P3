@@ -163,6 +163,12 @@ int tps_destroy(void)
 	3. Deallocate tps
 	*/
 
+    //Make sure current thread has tps
+    if(!currentTPSFound())
+    {
+        return -1;
+    }
+
 	//get tps pointer for current thread	
 	tps_t tps = findCurrentTPS();
 

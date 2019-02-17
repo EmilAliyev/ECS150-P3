@@ -129,6 +129,8 @@ int tps_destroy(void)
 	tps_t tps = findCurrentTPS();
 
 	//free pointer to mem
+	munmap(tps->memoryPage, TPS_SIZE);
+	
 
 	//remove from queue
 	int val = queue_delete(tpsqueue, tps);

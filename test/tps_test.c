@@ -4,12 +4,26 @@
 
 #include <tps.h>
 
-void thread1()
+
+void *thread2(void *ptid)
 {
-	printf("Testing thread 1...\n");
+    return NULL;
 }
 
-//Test error cases
+
+void *thread1()
+{
+    return NULL;
+}
+
+//Test tps already exists error
+void test_clone2()
+{
+
+    
+}
+
+//Test tid not found error
 void test_clone1()
 {
     printf("Cloning test 1... TID not found test\n");
@@ -23,6 +37,7 @@ void test_clone1()
 void test_clone()
 {
     test_clone1();
+    test_clone2();
 }
 
 //Init test - must return -1 if called for second time

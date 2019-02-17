@@ -67,6 +67,22 @@ static tps_t findCurrentTPS()
 	return ptr;	
 }
 
+//Check if tps exists for tid
+static int TPSFound(unsigned long int tid)
+{
+    tps_t ptr = findTPS(tid);
+
+    if(ptr)
+    {
+        return 1;
+    }
+    
+    else
+    {
+        return 0;
+    }
+}
+
 //Check if tps exists for current thread
 static int currentTPSFound()
 {
@@ -232,12 +248,40 @@ int tps_clone(pthread_t tid)
 	/*
 	Phase 2.1
 
-	1. Find tps for thread tid
+    1. Check for errors:
 
-	2. Find tps for current thread
+	2. Find tps for thread tid
 
-	3. Use memcpy to copy tps_tid's memory page to tps_current
+	3. Create tps for current thread
+
+	4. Use memcpy to copy tps_tid's memory page to tps_current
 	*/
+
+    //Check for errors
+
+    //tps not found for tid
+    if(!TPSFound(tid))
+    {
+        return -1;
+    }
+
+    //tps found for current thread
+    if(currentTPSFound())
+    {
+        return -1;
+    }
+
+    //Find tps for tid
+    tps_t tpssrc = findTPS(tid);
+
+    //Create tps for current thread
+    tps_create();
+
+    //Find it
+    tps_t tpscurr = findCurrentTPS();
+
+    memcpy(tpscurr->memoryPage, tpssrc->memoryPage, TPS_SIZE);
+
 	return 0;
 }
 

@@ -67,6 +67,22 @@ static tps_t findCurrentTPS()
 	return ptr;	
 }
 
+//Check if tps exists for current thread
+static int currentTPSFound()
+{
+    tps_t ptr = findCurrentTPS();
+
+    if(ptr)
+    {
+        return 1;
+    }
+
+    else
+    {
+        return 0;
+    }
+}
+
 
 int tps_init(int segv)
 {
@@ -100,6 +116,10 @@ int tps_create(void)
 	*/
 	
 	//need to check if tps is already allocated
+    if(currentTPSFound())
+    {
+        return -1;
+    }
 
 	//malloc tps
 	tps* new_tps = malloc(sizeof(struct tps));

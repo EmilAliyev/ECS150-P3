@@ -36,7 +36,7 @@ static queue_t tpsqueue; //Store the tpses
 /* Helper functions */
 
 //Find the current tps
-tps_t findCurrentTPS()
+static tps_t findCurrentTPS()
 {
 	//Dummy line so program compiles
 	queue_enqueue(tpsqueue, NULL);

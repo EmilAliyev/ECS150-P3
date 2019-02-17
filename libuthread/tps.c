@@ -51,8 +51,6 @@ static int findTid(void *data, void *arg)
 //Find any tps
 static tps_t findTPS(unsigned long int tid)
 {
-	unsigned long int tid = pthread_self();
-
 	tps_t ptr = NULL;
 
 	queue_iterate(tpsqueue, findTid, (void *) tid, (void **) &ptr);

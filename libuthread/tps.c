@@ -88,6 +88,16 @@ int tps_destroy(void)
 int tps_read(size_t offset, size_t length, char *buffer)
 {
 	/* TODO: Phase 2 */
+
+	/*
+	Phase 2.1
+
+	1. Find tps for current thread.
+
+	2. Check for errors
+
+	3. 
+	*/
 	return 0;
 }
 
@@ -100,6 +110,16 @@ int tps_write(size_t offset, size_t length, char *buffer)
 int tps_clone(pthread_t tid)
 {
 	/* TODO: Phase 2 */
+
+	/*
+	Phase 2.1
+
+	1. Find tps for thread tid
+
+	2. Find tps for current thread
+
+	3. Use memcpy to copy tps_tid's memory page to tps_current
+	*/
 	return 0;
 }
 

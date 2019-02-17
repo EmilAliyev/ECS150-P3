@@ -3,16 +3,24 @@ lib := libuthread.a
 objs := sem.o tps.o
 givenobjs := queue.o thread.o
 
+CC := gcc
+CCFLAGS := -Wall -Werror
+
+ifneq ($(D), 1)
+else
+CCFLAGS += -g
+endif
+
 all: $(lib)
 
 sem.o : sem.c
-	gcc -Wall -Werror -c sem.c -o sem.o
+	$(CC) $(CCFLAGS) -c -o $@ $<
 
 tps.o : tps.c
-	gcc -Wall -Werror -c tps.c -o tps.o
+	$(CC) $(CCFLAGS) -c -o $@ $<
 
 libuthread.a : $(objs)
-	ar rcs $(lib) $(objs) $(givenobjs)
+	ar rcs $@ $^ $(givenobjs)
 
 clean:
 	rm -rf $(lib) $(objs)

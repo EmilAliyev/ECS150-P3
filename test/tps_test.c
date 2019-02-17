@@ -14,6 +14,8 @@ void test_destroy()
 	printf("Testing tps_destroy()...\n");
 
 	assert(tps_destroy() == 0);
+
+	printf("Success!\n");
 	
 }
 

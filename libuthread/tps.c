@@ -124,6 +124,12 @@ int tps_create(void)
 	//malloc tps
 	tps* new_tps = malloc(sizeof(struct tps));
 
+    //Check to see if allocation failed
+    if(new_tps == NULL)
+    {
+        return -1;
+    }
+
 	//set tid to current tid
 	new_tps->tid = pthread_self();
 
@@ -132,6 +138,12 @@ int tps_create(void)
 	//anonymous means no actual file by this name exists
 	//Not sure if read/write protections are necessary 
 	new_tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+    //Check to see if allocation failed
+    if(new_tps->memoryPage == MAP_FAILED)
+    {
+        return -1;
+    }
 	
 	//enqueue tps
 	queue_enqueue(tpsqueue, new_tps);

@@ -30,6 +30,7 @@ typedef tps* tps_t;
 /* Global variables */
 
 static queue_t tpsqueue; //Store the tpses
+int initialized = 0; //Whether the API has been initialized
 
 
 /* Helper functions */
@@ -71,8 +72,16 @@ int tps_init(int segv)
 {
 	/* TODO: Phase 2 */
 
+    //Make sure API has not already been initialized
+    if(initialized)
+    {
+        return -1;
+    }
+
 	//initialize global queue
 	tpsqueue = queue_create();
+
+    initialized = 1;
 
 	return 0;
 }

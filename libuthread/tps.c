@@ -36,7 +36,7 @@ static queue_t tpsqueue; //Store the tpses
 
 //Function to be passed to q_iterate
 //returns 1 if tid passed in matches data tid, returns 0 otherwise
-static int find_tid(void *data, void *arg)
+static int findTid(void *data, void *arg)
 {
 	struct tps* tps = (struct tps *)data;
 	long unsigned int tid = tps->tid;
@@ -55,7 +55,7 @@ static tps_t findCurrentTPS()
 
 	struct tps* ptr = NULL;
 
-	queue_iterate(tpsqueue, find_tid, (void *)tid, (void**)&ptr);
+	queue_iterate(tpsqueue, findTid, (void *)tid, (void**)&ptr);
 
 	return ptr;	
 }

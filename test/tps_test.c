@@ -36,5 +36,6 @@ void test()
 
 int main()
 {
+    tps_init(1);
 	test();
 }

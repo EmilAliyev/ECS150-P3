@@ -70,9 +70,6 @@ static tps_t findCurrentTPS()
 int tps_init(int segv)
 {
 	/* TODO: Phase 2 */
-	/*
-	Phase 2.1: Do nothing
-	*/
 
 	//initialize global queue
 	tpsqueue = queue_create();

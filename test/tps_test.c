@@ -9,6 +9,17 @@ void thread1()
 	printf("Testing thread 1...\n");
 }
 
+//Init test - must return -1 if called for second time
+void test_init()
+{
+	printf("Testing tps_init()...\n");
+
+	assert(tps_init(1) == -1);
+
+	printf("Success!\n");
+}
+
+//Basic destroy test
 void test_destroy()
 {
 	printf("Testing tps_destroy()...\n");
@@ -19,6 +30,7 @@ void test_destroy()
 	
 }
 
+//Basic create test
 void test_create()
 {
 	printf("Testing tps_create()...\n");
@@ -30,6 +42,7 @@ void test_create()
 
 void test()
 {
+    test_init();
 	test_create();
 	test_destroy();
 }

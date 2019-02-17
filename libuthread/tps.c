@@ -19,14 +19,35 @@ TPS struct
 //2. tid
 */
 
+typedef struct tps
+{
+	void *memoryPage;
+	unsigned short tid;
+} tps;
+
+typedef tps* tps_t;
+
+/* Global variables */
+
+static queue_t tpsqueue; //Store the tpses
+
 /* TODO: Phase 2 */
 
-//Helper functions
+/* Helper functions */
+
+//Find the current tps
+tps_t findCurrentTPS()
+{
+	//Dummy line so program compiles
+	queue_enqueue(tpsqueue, NULL);
+
+	//Dummy return to compile
+	return NULL;
+}
 
 int tps_init(int segv)
 {
 	/* TODO: Phase 2 */
-
 	/*
 	Phase 2.1: Do nothing
 	*/

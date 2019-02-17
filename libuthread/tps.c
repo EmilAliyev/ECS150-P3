@@ -22,7 +22,7 @@ TPS struct
 typedef struct tps
 {
 	void *memoryPage;
-	unsigned short tid;
+	unsigned long int tid;
 } tps;
 
 typedef tps* tps_t;
@@ -48,14 +48,20 @@ static int findTid(void *data, void *arg)
 	return 0;
 }
 
+//Find any tps
+static tps_t findTPS(unsigned long int tid)
+{
+	struct tps* ptr = NULL;
+
+	queue_iterate(tpsqueue, findTid, (void *) tid, (void **) &ptr);
+
+	return ptr;
+}
+
 //Find the current tps
 static tps_t findCurrentTPS()
 {
-	unsigned long int tid = pthread_self();
-
-	struct tps* ptr = NULL;
-
-	queue_iterate(tpsqueue, findTid, (void *)tid, (void**)&ptr);
+	tps_t ptr = findTPS(pthread_self());
 
 	return ptr;	
 }

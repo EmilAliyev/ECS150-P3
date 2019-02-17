@@ -60,6 +60,7 @@ int sem_down(sem_t sem)
 	}
 	else{
 		//pthread_self comes from https://piazza.com/class/jqmqktp98ox44m?cid=302
+		//gets trhead id
 		long unsigned int tid = pthread_self();
 
 		//Enqueue blocked tid

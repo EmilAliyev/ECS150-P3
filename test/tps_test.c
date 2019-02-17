@@ -1,7 +1,21 @@
 #include <assert.h>
 #include <stdio.h>
+#include <pthread.h>
 
-#include "tps.h"
+#include <tps.h>
+
+void thread1()
+{
+	printf("Testing thread 1...\n");
+}
+
+void test_destroy()
+{
+	printf("Testing tps_destroy()...\n");
+
+	assert(tps_destroy() == 0);
+	
+}
 
 void test_create()
 {
@@ -15,6 +29,7 @@ void test_create()
 void test()
 {
 	test_create();
+	test_destroy();
 }
 
 int main()

@@ -9,6 +9,22 @@ void thread1()
 	printf("Testing thread 1...\n");
 }
 
+//Test error cases
+void test_clone1()
+{
+    printf("Cloning test 1... TID not found test\n");
+
+    assert(tps_clone(100) == -1);
+
+    printf("Success!\n");
+}
+
+//Basic clone test
+void test_clone()
+{
+    test_clone1();
+}
+
 //Init test - must return -1 if called for second time
 void test_init()
 {
@@ -53,6 +69,7 @@ void test()
     test_init();
 	test_create();
 	test_destroy();
+    test_clone();
 }
 
 int main()

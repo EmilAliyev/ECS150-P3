@@ -101,8 +101,11 @@ int tps_create(void)
 	//set tid to current tid
 	new_tps->tid = pthread_self();
 
-	//nmap allocates mempage 
-	//new_tps->mem = mmap(args);
+	//nmap allocates mempage
+	//private means that only this thread can access it
+	//anonymous means no actual file by this name exists
+	//Not sure if read/write protections are necessary 
+	new_tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 	
 	//enqueue tps
 	queue_enqueue(tpsqueue, new_tps);

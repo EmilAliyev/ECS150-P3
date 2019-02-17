@@ -24,7 +24,11 @@ void test_destroy()
 {
 	printf("Testing tps_destroy()...\n");
 
+    //First destroy should be successful
 	assert(tps_destroy() == 0);
+    
+    //Second destroy should be unsuccessful as there is nothing to destroy!
+    assert(tps_destroy() == -1);
 
 	printf("Success!\n");
 	

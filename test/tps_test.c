@@ -35,7 +35,11 @@ void test_create()
 {
 	printf("Testing tps_create()...\n");
 
+    //First create should be successful
 	assert(tps_create() == 0);
+
+    //Second create should be unsuccessful
+    assert(tps_create() == -1);
 
 	printf("Success!\n");
 }

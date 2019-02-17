@@ -142,7 +142,10 @@ int tps_read(size_t offset, size_t length, char *buffer)
 
 	2. Check for errors
 
-	3. 
+	3. Cast memory page of tps to char pointer memorypagechptr
+
+	4. Starting at offset, and going on for length characters,
+	copy characters from memorypagechptr to buffer.
 	*/
 	return 0;
 }
@@ -150,6 +153,20 @@ int tps_read(size_t offset, size_t length, char *buffer)
 int tps_write(size_t offset, size_t length, char *buffer)
 {
 	/* TODO: Phase 2 */
+
+	/*
+	Phase 2.1
+
+	1. Find tps for current thread
+
+	2. Check for errors
+
+	3. Cast memory page of tps to char pointer memorypagechptr
+
+	4. Starting at offset of memorypagechptr, and going on for length
+	chaaracters, copy characters buffer to memorypagechptr
+	*/
+
 	return 0;
 }
 

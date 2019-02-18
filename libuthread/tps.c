@@ -219,11 +219,16 @@ int tps_read(size_t offset, size_t length, char *buffer)
     copy characters from memorypagechptr to buffer.
     */
 
+ 
+    //Error checking
+
+
     //Make sure current thread has tps
     if(!currentTPSFound())
     {
         return -1;
     }
+
 
     //Make sure read operation is in bounds of tps
     if((offset + length) > TPS_SIZE)
@@ -231,17 +236,21 @@ int tps_read(size_t offset, size_t length, char *buffer)
         return -1;
     }
 
-    //Find tps for current thread
+    //Make sure buffer isn't null
+    if(buffer == NULL)
+    {
+        return -1;
+    }
+
+
+    //get tps pointer for current thread    
     tps_t tps = findCurrentTPS();
 
-    //Cast memory page into char ptr
-    char *mempagechptr = (char *) tps->memoryPage;
+    //cast memory page to char pointer
+    char* memorypagechptr = (char *) tps->memoryPage;
 
-    //Copy starting from offset
-    for(int i = 0; i < length; i++)
-    {
-        buffer[i] = mempagechptr[i + offset];
-    }
+    //copy from offset onward
+    memcpy(buffer, &memorypagechptr[offset], length);
 
     return 0;
 }

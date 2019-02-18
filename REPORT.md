@@ -1,1 +1,52 @@
-#Project 3 Report
+#ECS 150 Project 3 Report
+Noah White
+Emil Aliyev
+
+##Introduction
+
+Our report will be split into two sections, detailing the two phases of the
+project. The first section will examine the design decisions made in
+implementing our semaphore library. The second secion will examine the
+implementation of our thread private storage (TPS) library.
+
+##Semaphores
+
+###Semaphore Implementation
+
+The data structure used to represent our semaphore is nothing more that an
+integer value representing the number of resources availible and a queue
+representing blocked threads waiting for the resource. More specifically, the
+queue held pointers to the thread ids returned by pthread_self(). When threads
+need a resource, but it is unavailable, they are enqueued. When a resource is
+freed, if the queue has any threads waiting, they are dequeued and unblocked. 
+
+###Quirks in Semaphore Implementation
+
+sem_up, sem_down and sem_getvalue all have areas marked as critical sections. In
+the case of sem_up, this is to prevent another thread from unblocking the thread
+that the current thread is trying to unblock. In the case of sem_down, this is
+to prevent another thread from taking the resource that this thread has taken.
+In the case of sem_getvalue, this is used to prevent the returned value from
+changing before the function completes (though if the user is using this value
+for a check, they should already be calling the function from inside a critical
+area).
+
+##Thread Private Storage (TPS)
+
+###TPS Implmentation
+
+We have a data structure representing an indivdual TPS block. That TPS block
+contains a memory page and a thread id associated with the TPS block. We use a
+global queue to store pointers to all of our TPS blocks. tps_init creates this
+queue.
+
+###TPS Helper Functions
+
+We have several helper functions used in our tps library, to handle accessing
+the TPS queue. findTID is passed to queue_iterate, with the intention of finding
+the TPS block with a matching tid. findTPS takes a TID, calls queue_iterate with 
+findTID and the TID as an arguement, and then returns a pointer to the TPS
+block. findCurrentTPS just calles findTPS with the current thread tid as the
+arguement. TPSfound and CurrentTPSfound both just check if a thread has a TPS
+associated with it or not. 
+

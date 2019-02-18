@@ -249,8 +249,11 @@ int tps_read(size_t offset, size_t length, char *buffer)
     //cast memory page to char pointer
     char* memorypagechptr = (char *) tps->memoryPage;
 
-    //copy from offset onward
-    memcpy(buffer, &memorypagechptr[offset], length);
+    //Copy starting from offset
+    for(int i = 0; i < length; i++)
+    {
+        buffer[i] = memorypagechptr[i + offset];
+    }
 
     return 0;
 }

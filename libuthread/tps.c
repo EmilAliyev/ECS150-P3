@@ -218,6 +218,30 @@ int tps_read(size_t offset, size_t length, char *buffer)
     4. Starting at offset, and going on for length characters,
     copy characters from memorypagechptr to buffer.
     */
+ 
+    //Error checking
+
+    //Make sure current thread has tps
+    if(!currentTPSFound())
+    {
+        return -1;
+    }
+
+    //Make sure buffer isn't null
+    if(buffer == NULL)
+    {
+        return -1;
+    }
+
+    //get tps pointer for current thread    
+    tps_t tps = findCurrentTPS();
+
+    //cast memory page to char pointer
+    char* memorypagechptr = (char *) tps->memoryPage;
+
+    //copy from offset onward
+    memcpy(buffer, &memorypagechptr[offset], length);
+
     return 0;
 }
 

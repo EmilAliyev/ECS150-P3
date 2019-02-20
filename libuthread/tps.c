@@ -156,20 +156,6 @@ static void changeProtection(tps_t tps, int prot)
 
 }
 
-/*
-//Copy memory page
-static void copyPage(tps_t src, tps_t dest)
-{
-    //Get the pages
-    void *mempagesrc = getPage(src);
-    void *mempagedest = getPage(dest);
-    
-    //Copy the memory
-    memcpy(mempagedest, mempagesrc, TPS_SIZE);
-
-}
-*/
-
 //Check to see if allocation failed for tps memory page
 static int allocationFailed(tps_t tps)
 {
@@ -531,21 +517,31 @@ int tps_write(size_t offset, size_t length, char *buffer)
     //Find tps for current thread
     tps_t tps = findCurrentTPS();
 
-    /*
     if(tps->memoryPage->count > 1){
+        //Get the pages
+        void *mempagesrc = getPage(tps);	
+	changeProtection(tps, PROT_READ);
 
-        page* page_ptr = tps->memoryPage
 
-        createPage(tps);
+	createPage(tps);
 
-        //Check to see if allocation failed
+	//Check to see if allocation failed
         if(allocationFailed(tps))
         {
             return -1;
         }
-    	
+
+	void *mempagedest = getPage(tps);
+
+        //Change permission of current memory page to allow write operation
+        changeProtection(tps, PROT_WRITE);
+
+	//Copy the memory
+        memcpy(mempagedest, mempagesrc, TPS_SIZE);
+    
+	changeProtection(tps, PROT_NONE);	
+    	mprotect(mempagesrc, TPS_SIZE, PROT_NONE);
     }
-    */
 
     //Change permission of memory page to allow write operation
     changeProtection(tps, PROT_WRITE);
@@ -603,16 +599,6 @@ int tps_clone(pthread_t tid)
 
     tpscurr->memoryPage = tpssrc->memoryPage;
     tpscurr->memoryPage->count += 1;
-
-    //Change permission of current memory page to allow write operation
-    //changeProtection(tpscurr, PROT_WRITE);
-
-    //copyPage(tpssrc, tpscurr);
-
-    //Reset permission of memory pages
-    //changeProtection(tpssrc, PROT_NONE);
-    //changeProtection(tpscurr, PROT_NONE);
-
 
     return 0;
 }

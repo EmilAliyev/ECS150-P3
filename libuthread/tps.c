@@ -121,6 +121,19 @@ static int destroyPage(tps_t tps)
     return 0; 
 }
 
+//Change protection for tps memory page
+static void changeProtection(tps_t tps, int prot)
+{
+    //Change protection
+    mprotect(tps->memoryPage, TPS_SIZE, prot);
+
+    /*
+    Phase 2.3
+
+    Change protection for tps->page->memory
+    */
+}
+
 
 //Check if tps exists for tid
 static int TPSFound(unsigned long int tid)
@@ -376,7 +389,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
     tps_t tps = findCurrentTPS();
 
     //Change permission of memory page to allow read operation
-    mprotect(tps->memoryPage, TPS_SIZE, PROT_READ);
+    changeProtection(tps, PROT_READ);
 
     //cast memory page to char pointer
     char* memorypagechptr = (char *) tps->memoryPage;

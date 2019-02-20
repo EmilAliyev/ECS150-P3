@@ -99,6 +99,40 @@ static int currentTPSFound()
     }
 }
 
+//find if a tps from another tps pointer
+static int findTPSfromfault(void* data, void *fault)
+{
+   tps_t tps = (tps_t) data; 
+   tps_t broken_tps = (tps_t) fault;
+
+   if (tps == broken_tps)
+       return 1;
+
+   return 0;
+}
+
+//segv handler
+static void segv_handler(int sig, siginfo_t *si, void *context)
+{
+    /*
+     * Get the address corresponding to the beginning of the page where the
+     * fault occurred
+     */
+    void *p_fault = (void*)((uintptr_t)si->si_addr & ~(TPS_SIZE - 1));
+
+    tps_t ptr = NULL;
+    
+    queue_iterate(tpsqueue, findTPSfromfault, p_fault, (void **) &ptr);
+    
+    if (ptr != NULL)
+        fprintf(stderr, "TPS protection error!\n");
+
+    /* In any case, restore the default signal handlers */
+    signal(SIGSEGV, SIG_DFL);
+    signal(SIGBUS, SIG_DFL);
+    /* And transmit the signal again in order to cause the program to crash */
+    raise(sig);
+}
 
 int tps_init(int segv)
 {
@@ -114,6 +148,16 @@ int tps_init(int segv)
     tpsqueue = queue_create();
 
     initialized = 1;
+
+    if (segv) {
+        struct sigaction sa;
+
+        sigemptyset(&sa.sa_mask);
+        sa.sa_flags = SA_SIGINFO;
+        sa.sa_sigaction = segv_handler;
+        sigaction(SIGBUS, &sa, NULL);
+        sigaction(SIGSEGV, &sa, NULL);
+    }
 
     return 0;
 }

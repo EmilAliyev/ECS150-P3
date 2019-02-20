@@ -131,8 +131,11 @@ static int destroyPage(tps_t tps)
 //Change protection for tps memory page
 static void changeProtection(tps_t tps, int prot)
 {
+    //Get the page
+    void *mempage = getPage(tps);
+
     //Change protection
-    mprotect(tps->memoryPage, TPS_SIZE, prot);
+    mprotect(mempage, TPS_SIZE, prot);
 
     /*
     Phase 2.3

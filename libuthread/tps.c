@@ -134,6 +134,19 @@ static void changeProtection(tps_t tps, int prot)
     */
 }
 
+//Copy memory page
+static void copyPage(tps_t src, tps_t dest)
+{
+    //Copy the memory
+    memcpy(dest->memoryPage, src->memoryPage, TPS_SIZE);
+
+    /*
+    Phase 2.3
+
+    Copy from src->page->memory to dest->page->memory
+    */
+}
+
 
 //Check if tps exists for tid
 static int TPSFound(unsigned long int tid)
@@ -508,7 +521,7 @@ int tps_clone(pthread_t tid)
     //Change permission of current memory page to allow write operation
     changeProtection(tpscurr, PROT_WRITE);
 
-    memcpy(tpscurr->memoryPage, tpssrc->memoryPage, TPS_SIZE);
+    copyPage(tpssrc, tpscurr);
 
     //Reset permission of memory pages
     changeProtection(tpssrc, PROT_NONE);

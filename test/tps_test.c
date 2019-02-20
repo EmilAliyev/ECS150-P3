@@ -10,8 +10,8 @@
 
 static sem_t sem1, sem2;
 
-static char msg1[TPS_SIZE] = "Hello 1\n";
-static char msg2[TPS_SIZE] = "hello 2\n";
+static char msg1[TPS_SIZE] = "Hello world\n";
+static char msg2[TPS_SIZE] = "hello world\n";
 
 void *thread2(void *ptid)
 {

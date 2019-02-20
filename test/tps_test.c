@@ -16,6 +16,92 @@ void *thread1()
     return NULL;
 }
 
+//Basic read test (no offset)
+void test_read3()
+{
+    printf("Testing tps_read()...\n");
+
+    char buffer[20];
+    int size = 5;
+    int offset = 5;
+
+    assert(tps_read(offset, size, buffer) == 0);
+
+    printf("Buffer reads: %s\n", buffer);
+    printf("Success!\n");
+}
+
+//Illegal read test
+void test_read2()
+{ 
+    char buffer[20];
+    int size = 5;
+    int offset = 4096;
+
+    printf("Testing out of bounds tps_read()...\n");
+
+    assert(tps_read(offset, size, buffer) == -1);
+
+//    printf("Out of bounds read failed properly!\n"); 
+    printf("Success!\n");
+}
+
+//Basic read test (no offset)
+void test_read1()
+{
+    printf("Testing tps_read()...\n");
+
+    char buffer[20];
+    int size = 5;
+    int offset = 0;
+
+    assert(tps_read(offset, size, buffer) == 0);
+
+    printf("Buffer reads: %s\n", buffer);
+    printf("Success!\n");
+}
+
+void test_read()
+{
+    test_read1();
+    test_read2();
+    test_read3();
+}
+
+//Basic write test (no offset)
+void test_write1()
+{
+    printf("Testing tps_write()...\n");
+
+    char* buffer = "Hello World";
+    int size = 10;
+    int offset = 0;
+
+    assert(tps_write(offset, size, buffer) == 0);
+
+    printf("Success!\n");
+}
+
+//illegal offset write test
+void test_write2()
+{
+    printf("Testing illegal offest tps_write()...\n");
+
+    char* buffer = "Hello World";
+    int size = 10;
+    int offset = 4096;
+
+    assert(tps_write(offset, size, buffer) == -1);
+
+    printf("Success!\n");
+}
+
+void test_write()
+{
+    test_write1();
+    test_write2();
+}
+
 //Test tps already exists error
 void test_clone2()
 {
@@ -32,6 +118,7 @@ void test_clone1()
 
     printf("Success!\n");
 }
+
 
 //Basic clone test
 void test_clone()
@@ -83,6 +170,10 @@ void test()
 {
     test_init();
     test_create();
+
+    test_write();
+    test_read();
+
     test_destroy();
     test_clone();
 }

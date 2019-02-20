@@ -137,31 +137,28 @@ static void changeProtection(tps_t tps, int prot)
     //Change protection
     mprotect(mempage, TPS_SIZE, prot);
 
-    /*
-    Phase 2.3
-
-    Change protection for tps->page->memory
-    */
 }
 
 //Copy memory page
 static void copyPage(tps_t src, tps_t dest)
 {
+    //Get the pages
+    void *mempagesrc = getPage(src);
+    void *mempagedest = getPage(dest);
+    
     //Copy the memory
-    memcpy(dest->memoryPage, src->memoryPage, TPS_SIZE);
+    memcpy(mempagedest, mempagesrc, TPS_SIZE);
 
-    /*
-    Phase 2.3
-
-    Copy from src->page->memory to dest->page->memory
-    */
 }
 
 //Check to see if allocation failed for tps memory page
 static int allocationFailed(tps_t tps)
 {
+    //Get the page
+    void *mempage = getPage(tps);
+
     //Check to see if allocation failed
-    if(tps->memoryPage == MAP_FAILED)
+    if(mempage == MAP_FAILED)
     {
         return 1;
     }   

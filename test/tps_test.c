@@ -1,18 +1,91 @@
 #include <assert.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
+#include <sem.h>
 #include <tps.h>
 
+static sem_t sem1, sem2;
+
+static char msg1[TPS_SIZE] = "Hello 1\n";
+static char msg2[TPS_SIZE] = "hello 2\n";
 
 void *thread2(void *ptid)
 {
+    char *buffer = malloc(TPS_SIZE);
+
+    /* Create TPS and initialize with *msg1 */
+    tps_create();
+    tps_write(0, TPS_SIZE, msg1);
+
+    /* Read from TPS and make sure it contains the message */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!memcmp(msg1, buffer, TPS_SIZE));
+    printf("thread2: read OK!\n");
+
+    /* Transfer CPU to thread 1 and get blocked */
+    sem_up(sem1);
+    sem_down(sem2);
+
+    /* When we're back, read TPS and make sure it sill contains the original */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!memcmp(msg1, buffer, TPS_SIZE));
+    printf("thread2: read OK!\n");
+
+    /* Transfer CPU to thread 1 and get blocked */
+    sem_up(sem1);
+    sem_down(sem2);
+
+    /* Destroy TPS and quit */
+    tps_destroy();
     return NULL;
 }
 
 
 void *thread1()
 {
+    pthread_t tid;
+    char *buffer = malloc(TPS_SIZE);
+
+    /* Create thread 2 and get blocked */
+    pthread_create(&tid, NULL, thread2, NULL);
+    sem_down(sem1);
+
+    /* When we're back, clone thread 2's TPS */
+    tps_clone(tid);
+
+    /* Read the TPS and make sure it contains the original */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!memcmp(msg1, buffer, TPS_SIZE));
+    printf("thread1: read OK!\n");
+
+    /* Modify TPS to cause a copy on write */
+    buffer[0] = 'h';
+    tps_write(0, 1, buffer);
+
+    /* Transfer CPU to thread 2 and get blocked */
+    sem_up(sem2);
+    sem_down(sem1);
+
+    /* When we're back, make sure our modification is still there */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!strcmp(msg2, buffer));
+    printf("thread1: read OK!\n");
+
+    /* Transfer CPU to thread 2 */
+    sem_up(sem2);
+
+    /* Wait for thread2 to die, and quit */
+    pthread_join(tid, NULL);
+    tps_destroy();
+
     return NULL;
 }
 
@@ -166,7 +239,7 @@ void test_create()
     printf("Success!\n");
 }
 
-void test()
+void basic_test()
 {
     test_init();
     test_create();
@@ -178,8 +251,30 @@ void test()
     test_clone();
 }
 
+void comp_test()
+{
+    printf("\nBeginning comprehensive tests\n");
+    
+    pthread_t tid;
+ 
+    //maybe move all this to an expanded testing fn?
+    sem1 = sem_create(0);
+    sem2 = sem_create(0);
+
+    pthread_create(&tid, NULL, thread1, NULL);
+    pthread_join(tid, NULL);
+
+    sem_destroy(sem1);
+    sem_destroy(sem2);   
+}
+
 int main()
 {
     tps_init(1);
-    test();
+
+    //start by running all the basic diagonostics/tests
+    basic_test();
+
+    //Comprehensive test
+    comp_test();
 }

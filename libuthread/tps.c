@@ -511,8 +511,8 @@ int tps_clone(pthread_t tid)
     memcpy(tpscurr->memoryPage, tpssrc->memoryPage, TPS_SIZE);
 
     //Reset permission of memory pages
-    mprotect(tpssrc->memoryPage, TPS_SIZE, PROT_NONE);
-    mprotect(tpscurr->memoryPage, TPS_SIZE, PROT_NONE);
+    changeProtection(tpssrc, PROT_NONE);
+    changeProtection(tpscurr, PROT_NONE);
 
 
    

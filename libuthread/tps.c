@@ -41,7 +41,7 @@ typedef struct page
 
 typedef struct tps
 {
-    void *memoryPage;
+    page *memoryPage;
     unsigned long int tid;
 } tps;
 
@@ -90,14 +90,19 @@ static tps_t findCurrentTPS()
 //Get the page for tps
 void *getPage(tps_t tps)
 {
-    return tps->memoryPage;
+    return tps->memoryPage->memory;
 }
 
 //Create a page for given tps
 static void createPage(tps_t tps)
 {
+    //Ceate page
+    tps->memoryPage = malloc(sizeof(struct page));
+
+    tps->memoryPage->count = 1;
+
     //Allocate memory
-    tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    tps->memoryPage->memory = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
 
     /*
@@ -120,6 +125,9 @@ static int destroyPage(tps_t tps)
 
     //Deallocate memory
     munmap(mempage, TPS_SIZE);
+    
+    //free page
+    free(tps->memoryPage);
 
         
 

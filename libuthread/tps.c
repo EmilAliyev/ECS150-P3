@@ -79,6 +79,11 @@ static tps_t findCurrentTPS()
     return ptr; 
 }
 
+//Get the page for tps
+void *getPage(tps_t tps)
+{
+    return tps->memoryPage;
+}
 
 //Create a page for given tps
 static void createPage(tps_t tps)
@@ -101,9 +106,11 @@ static void createPage(tps_t tps)
 //Destroy page for tps
 static int destroyPage(tps_t tps)
 {
+    //Get the page
+    void *mempage = getPage(tps);
 
     //Deallocate memory
-    munmap(tps->memoryPage, TPS_SIZE);
+    munmap(mempage, TPS_SIZE);
 
         
 

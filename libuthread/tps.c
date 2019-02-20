@@ -130,6 +130,11 @@ int tps_create(void)
     3. Set tid of tps to current tid
     4. Add tps to queue
     */
+
+    /*
+    Phase 2.2
+    //When allocating new tps, give memory page no read/write permissions
+    */
     
     //need to check if tps is already allocated
     if(currentTPSFound())
@@ -153,7 +158,7 @@ int tps_create(void)
     //private means that only this thread can access it
     //anonymous means no actual file by this name exists
     //Not sure if read/write protections are necessary 
-    new_tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_WRITE | PROT_READ, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    new_tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     //Check to see if allocation failed
     if(new_tps->memoryPage == MAP_FAILED)
@@ -219,6 +224,13 @@ int tps_read(size_t offset, size_t length, char *buffer)
     copy characters from memorypagechptr to buffer.
     */
 
+    /*
+    Phase 2.2
+    
+    Before reading, change protection of memory page to allow read,
+    then after reading, reset protection to not allow access
+    */
+
  
     //Error checking
 
@@ -246,6 +258,9 @@ int tps_read(size_t offset, size_t length, char *buffer)
     //get tps pointer for current thread    
     tps_t tps = findCurrentTPS();
 
+    //Change permission of memory page to allow read operation
+    mprotect(tps->memoryPage, TPS_SIZE, PROT_READ);
+
     //cast memory page to char pointer
     char* memorypagechptr = (char *) tps->memoryPage;
 
@@ -254,6 +269,9 @@ int tps_read(size_t offset, size_t length, char *buffer)
     {
         buffer[i] = memorypagechptr[i + offset];
     }
+
+    //Reset permission of memory page
+    mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
 
     return 0;
 }
@@ -275,6 +293,13 @@ int tps_write(size_t offset, size_t length, char *buffer)
     chaaracters, copy characters buffer to memorypagechptr
     */
 
+    /*
+    Phase 2.2
+    
+    Before writing, change protection of memory page to allow write,
+    then after reading, reset protection to not allow access
+    */
+
     //Make sure current thread has tps
     if(!currentTPSFound())
     {
@@ -290,6 +315,9 @@ int tps_write(size_t offset, size_t length, char *buffer)
     //Find tps for current thread
     tps_t tps = findCurrentTPS();
 
+    //Change permission of memory page to allow read operation
+    mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
+
     //Cast memory page into char ptr
     char *mempagechptr = (char *) tps->memoryPage;
 
@@ -298,6 +326,9 @@ int tps_write(size_t offset, size_t length, char *buffer)
     {
         mempagechptr[i + offset] = buffer[i];
     }
+
+    //Reset permission of memory page
+    mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
 
     return 0;
 }

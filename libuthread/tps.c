@@ -147,6 +147,44 @@ static void copyPage(tps_t src, tps_t dest)
     */
 }
 
+//Check to see if allocation failed for tps memory page
+static int allocationFailed(tps_t tps)
+{
+    //Check to see if allocation failed
+    if(tps->memoryPage == MAP_FAILED)
+    {
+        return 1;
+    }   
+
+    return 0;
+}
+
+//Read from page to buffer
+static void readFromPage(tps_t tps, size_t offset, size_t length, char * buffer)
+{
+    //cast memory page to char pointer
+    char* memorypagechptr = (char *) tps->memoryPage;
+
+    //Copy starting from offset
+    for(int i = 0; i < length; i++)
+    {
+        buffer[i] = memorypagechptr[i + offset];
+    }
+}
+
+//Write to page from buffer
+static void writeToPage(tps_t tps, size_t offset, size_t length, char *buffer)
+{
+    //Cast memory page into char ptr
+    char *mempagechptr = (char *) tps->memoryPage;
+
+    //Copy starting from offset
+    for(int i = 0; i < length; i++)
+    {
+        mempagechptr[i + offset] = buffer[i];
+    }
+}
+
 
 //Check if tps exists for tid
 static int TPSFound(unsigned long int tid)
@@ -291,7 +329,7 @@ int tps_create(void)
     createPage(new_tps);
 
     //Check to see if allocation failed
-    if(new_tps->memoryPage == MAP_FAILED)
+    if(allocationFailed(new_tps))
     {
         return -1;
     }
@@ -404,14 +442,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
     //Change permission of memory page to allow read operation
     changeProtection(tps, PROT_READ);
 
-    //cast memory page to char pointer
-    char* memorypagechptr = (char *) tps->memoryPage;
-
-    //Copy starting from offset
-    for(int i = 0; i < length; i++)
-    {
-        buffer[i] = memorypagechptr[i + offset];
-    }
+    readFromPage(tps, offset, length, buffer);
 
     //Reset permission of memory page
     changeProtection(tps, PROT_NONE);
@@ -461,14 +492,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
     //Change permission of memory page to allow write operation
     changeProtection(tps, PROT_WRITE);
 
-    //Cast memory page into char ptr
-    char *mempagechptr = (char *) tps->memoryPage;
-
-    //Copy starting from offset
-    for(int i = 0; i < length; i++)
-    {
-        mempagechptr[i + offset] = buffer[i];
-    }
+    writeToPage(tps, offset, length, buffer);
 
     //Reset permission of memory page
     changeProtection(tps, PROT_NONE);

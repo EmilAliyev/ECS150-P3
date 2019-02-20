@@ -79,16 +79,17 @@ static tps_t findCurrentTPS()
     return ptr; 
 }
 
+/*
 //Create a page for current tps
 static void createPage()
 {
     //Find current tps
-    tps_t ptr = findCurrentTPS();
+    //tps_t ptr = findCurrentTPS();
 
     //Allocate new page
 
 }
-
+*/
 
 //Check if tps exists for tid
 static int TPSFound(unsigned long int tid)

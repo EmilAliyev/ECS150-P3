@@ -61,12 +61,6 @@ static int findTid(void *data, void *arg)
     return 0;
 }
 
-//Create a page for current tps
-static int createPage()
-{
-
-}
-
 //Find any tps
 static tps_t findTPS(unsigned long int tid)
 {
@@ -84,6 +78,17 @@ static tps_t findCurrentTPS()
 
     return ptr; 
 }
+
+//Create a page for current tps
+static void createPage()
+{
+    //Find current tps
+    tps_t ptr = findCurrentTPS();
+
+    //Allocate new page
+
+}
+
 
 //Check if tps exists for tid
 static int TPSFound(unsigned long int tid)

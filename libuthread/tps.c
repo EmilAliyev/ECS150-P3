@@ -19,11 +19,7 @@ TPS struct
 //2. tid
 */
 
-typedef struct tps
-{
-    void *memoryPage;
-    unsigned long int tid;
-} tps;
+
 
 /*
 Phase 2.3 - Structs
@@ -36,6 +32,18 @@ TPS:
 -pointer to page
 -tid
 */
+
+typedef struct page
+{
+    void *memory;
+    int count;
+} page;
+
+typedef struct tps
+{
+    void *memoryPage;
+    unsigned long int tid;
+} tps;
 
 typedef tps* tps_t;
 

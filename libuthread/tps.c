@@ -401,7 +401,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
     }
 
     //Reset permission of memory page
-    mprotect(tps->memoryPage, TPS_SIZE, PROT_NONE);
+    changeProtection(tps, PROT_NONE);
 
     return 0;
 }
@@ -446,7 +446,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
     tps_t tps = findCurrentTPS();
 
     //Change permission of memory page to allow write operation
-    mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
+    changeProtection(tps, PROT_WRITE);
 
     //Cast memory page into char ptr
     char *mempagechptr = (char *) tps->memoryPage;
@@ -458,7 +458,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
     }
 
     //Reset permission of memory page
-    mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
+    changeProtection(tps, PROT_NONE);
 
     return 0;
 }

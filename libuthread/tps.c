@@ -359,7 +359,7 @@ int tps_write(size_t offset, size_t length, char *buffer)
     //Find tps for current thread
     tps_t tps = findCurrentTPS();
 
-    //Change permission of memory page to allow read operation
+    //Change permission of memory page to allow write operation
     mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
 
     //Cast memory page into char ptr
@@ -410,13 +410,26 @@ int tps_clone(pthread_t tid)
     //Find tps for tid
     tps_t tpssrc = findTPS(tid);
 
+    //Change permission of source memory page to allow read operation
+    mprotect(tpssrc->memoryPage, TPS_SIZE, PROT_READ);
+
     //Create tps for current thread
     tps_create();
 
     //Find it
     tps_t tpscurr = findCurrentTPS();
 
+    //Change permission of current memory page to allow write operation
+    mprotect(tpscurr->memoryPage, TPS_SIZE, PROT_WRITE);
+
     memcpy(tpscurr->memoryPage, tpssrc->memoryPage, TPS_SIZE);
+
+    //Reset permission of memory pages
+    mprotect(tpssrc->memoryPage, TPS_SIZE, PROT_READ);
+    mprotect(tpscurr->memoryPage, TPS_SIZE, PROT_WRITE);
+
+
+   
 
     return 0;
 }

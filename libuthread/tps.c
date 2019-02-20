@@ -401,7 +401,7 @@ int tps_read(size_t offset, size_t length, char *buffer)
     }
 
     //Reset permission of memory page
-    mprotect(tps->memoryPage, TPS_SIZE, PROT_WRITE);
+    mprotect(tps->memoryPage, TPS_SIZE, PROT_NONE);
 
     return 0;
 }

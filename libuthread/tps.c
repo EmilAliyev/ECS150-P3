@@ -497,7 +497,7 @@ int tps_clone(pthread_t tid)
     tps_t tpssrc = findTPS(tid);
 
     //Change permission of source memory page to allow read operation
-    mprotect(tpssrc->memoryPage, TPS_SIZE, PROT_READ);
+    changeProtection(tpssrc, PROT_READ);
 
     //Create tps for current thread
     tps_create();
@@ -506,13 +506,13 @@ int tps_clone(pthread_t tid)
     tps_t tpscurr = findCurrentTPS();
 
     //Change permission of current memory page to allow write operation
-    mprotect(tpscurr->memoryPage, TPS_SIZE, PROT_WRITE);
+    changeProtection(tpscurr, PROT_WRITE);
 
     memcpy(tpscurr->memoryPage, tpssrc->memoryPage, TPS_SIZE);
 
     //Reset permission of memory pages
-    mprotect(tpssrc->memoryPage, TPS_SIZE, PROT_READ);
-    mprotect(tpscurr->memoryPage, TPS_SIZE, PROT_WRITE);
+    mprotect(tpssrc->memoryPage, TPS_SIZE, PROT_NONE);
+    mprotect(tpscurr->memoryPage, TPS_SIZE, PROT_NONE);
 
 
    

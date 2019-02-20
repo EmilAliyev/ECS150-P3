@@ -230,7 +230,7 @@ static int currentTPSFound()
 static int findTPSfromfault(void* data, void *fault)
 {
    tps_t tps = (tps_t) data;
-   void * memPage = tps->memoryPage; 
+   void * memPage = getPage(tps); 
    
    if (memPage == fault)
        return 1;

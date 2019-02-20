@@ -170,7 +170,7 @@ static int allocationFailed(tps_t tps)
 static void readFromPage(tps_t tps, size_t offset, size_t length, char * buffer)
 {
     //cast memory page to char pointer
-    char* memorypagechptr = (char *) tps->memoryPage;
+    char* memorypagechptr = (char *) getPage(tps);
 
     //Copy starting from offset
     for(int i = 0; i < length; i++)
@@ -183,7 +183,7 @@ static void readFromPage(tps_t tps, size_t offset, size_t length, char * buffer)
 static void writeToPage(tps_t tps, size_t offset, size_t length, char *buffer)
 {
     //Cast memory page into char ptr
-    char *mempagechptr = (char *) tps->memoryPage;
+    char *mempagechptr = (char *) getPage(tps);
 
     //Copy starting from offset
     for(int i = 0; i < length; i++)

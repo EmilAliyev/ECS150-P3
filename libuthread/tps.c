@@ -156,6 +156,7 @@ static void changeProtection(tps_t tps, int prot)
 
 }
 
+/*
 //Copy memory page
 static void copyPage(tps_t src, tps_t dest)
 {
@@ -167,6 +168,7 @@ static void copyPage(tps_t src, tps_t dest)
     memcpy(mempagedest, mempagesrc, TPS_SIZE);
 
 }
+*/
 
 //Check to see if allocation failed for tps memory page
 static int allocationFailed(tps_t tps)
@@ -277,6 +279,35 @@ static void segv_handler(int sig, siginfo_t *si, void *context)
     raise(sig);
 }
 
+//sets up a new tps object
+int tpsmake(tps_t* ret_tps)
+{
+    //need to check if tps is already allocated
+    if(currentTPSFound())
+    {
+        return -1;
+    }
+
+    //malloc tps
+    tps* new_tps = malloc(sizeof(struct tps));
+
+    //Check to see if allocation failed
+    if(new_tps == NULL)
+    {
+        return -1;
+    }
+
+    //set tid to current tid
+    new_tps->tid = pthread_self();
+
+    //enqueue tps
+    queue_enqueue(tpsqueue, new_tps);
+
+    *ret_tps = new_tps;
+    
+    return 0; 
+}
+
 int tps_init(int segv)
 {
     /* TODO: Phase 2 */
@@ -327,24 +358,14 @@ int tps_create(void)
     Phase 2.3
     Instead of allocating memory with mmap, allocate a page using createPage()
     */
-    
-    //need to check if tps is already allocated
-    if(currentTPSFound())
-    {
-        return -1;
+
+    tps_t new_tps = NULL;
+
+    int retval = tpsmake(&new_tps);
+
+    if (retval == -1){
+    	return -1;
     }
-
-    //malloc tps
-    tps* new_tps = malloc(sizeof(struct tps));
-
-    //Check to see if allocation failed
-    if(new_tps == NULL)
-    {
-        return -1;
-    }
-
-    //set tid to current tid
-    new_tps->tid = pthread_self();
 
     //nmap allocates mempage
     //private means that only this thread can access it
@@ -358,9 +379,6 @@ int tps_create(void)
         return -1;
     }
     
-    //enqueue tps
-    queue_enqueue(tpsqueue, new_tps);
-
     return 0;
 }
 
@@ -513,6 +531,22 @@ int tps_write(size_t offset, size_t length, char *buffer)
     //Find tps for current thread
     tps_t tps = findCurrentTPS();
 
+    /*
+    if(tps->memoryPage->count > 1){
+
+        page* page_ptr = tps->memoryPage
+
+        createPage(tps);
+
+        //Check to see if allocation failed
+        if(allocationFailed(tps))
+        {
+            return -1;
+        }
+    	
+    }
+    */
+
     //Change permission of memory page to allow write operation
     changeProtection(tps, PROT_WRITE);
 
@@ -561,22 +595,24 @@ int tps_clone(pthread_t tid)
     changeProtection(tpssrc, PROT_READ);
 
     //Create tps for current thread
-    tps_create();
+    tps_t curr_tps = NULL;
+    tpsmake(&curr_tps);
 
     //Find it
     tps_t tpscurr = findCurrentTPS();
 
-    //Change permission of current memory page to allow write operation
-    changeProtection(tpscurr, PROT_WRITE);
+    tpscurr->memoryPage = tpssrc->memoryPage;
+    tpscurr->memoryPage->count += 1;
 
-    copyPage(tpssrc, tpscurr);
+    //Change permission of current memory page to allow write operation
+    //changeProtection(tpscurr, PROT_WRITE);
+
+    //copyPage(tpssrc, tpscurr);
 
     //Reset permission of memory pages
-    changeProtection(tpssrc, PROT_NONE);
-    changeProtection(tpscurr, PROT_NONE);
+    //changeProtection(tpssrc, PROT_NONE);
+    //changeProtection(tpscurr, PROT_NONE);
 
-
-   
 
     return 0;
 }

@@ -25,6 +25,18 @@ typedef struct tps
     unsigned long int tid;
 } tps;
 
+/*
+Phase 2.3 - Structs
+
+Page:
+-Void pointer to memory
+-Count - number of tpses using this page
+
+TPS:
+-pointer to page
+-tid
+*/
+
 typedef tps* tps_t;
 
 /* Global variables */
@@ -47,6 +59,12 @@ static int findTid(void *data, void *arg)
         return 1;
 
     return 0;
+}
+
+//Create a page for current tps
+static int createPage()
+{
+
 }
 
 //Find any tps

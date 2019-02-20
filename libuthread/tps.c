@@ -102,10 +102,10 @@ static int currentTPSFound()
 //find if a tps from another tps pointer
 static int findTPSfromfault(void* data, void *fault)
 {
-   tps_t tps = (tps_t) data; 
-   tps_t broken_tps = (tps_t) fault;
-
-   if (tps == broken_tps)
+   tps_t tps = (tps_t) data;
+   void * memPage = tps->memoryPage; 
+   
+   if (memPage == fault)
        return 1;
 
    return 0;
@@ -123,7 +123,7 @@ static void segv_handler(int sig, siginfo_t *si, void *context)
     tps_t ptr = NULL;
     
     queue_iterate(tpsqueue, findTPSfromfault, p_fault, (void **) &ptr);
-    
+   
     if (ptr != NULL)
         fprintf(stderr, "TPS protection error!\n");
 

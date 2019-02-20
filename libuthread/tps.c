@@ -79,15 +79,39 @@ static tps_t findCurrentTPS()
     return ptr; 
 }
 
-/*
-//Create a page for current tps
-static void createPage()
-{
-    //Find current tps
-    //tps_t ptr = findCurrentTPS();
 
+//Create a page for given tps
+static void createPage(tps_t ptr)
+{
+    //Allocate memory
+    ptr->memoryPage = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+    /*
+    Phase 2.3
     //Allocate new page
 
+    //Count for page starts at 1
+
+    //Allocate memory for page
+    */
+
+}
+
+/*
+//Destroy page for current tps
+static int destroyPage()
+{
+
+    
+    Phase 2.3
+    //If count for page is greater than 1, do not destroy it and return -1
+
+    //Otherwise:
+
+    //Deallocate the memory with munmap
+
+    //Free the page
+     
 }
 */
 
@@ -203,6 +227,11 @@ int tps_create(void)
     Phase 2.2
     //When allocating new tps, give memory page no read/write permissions
     */
+
+    /*
+    Phase 2.3
+    Instead of allocating memory with mmap, allocate a page using createPage()
+    */
     
     //need to check if tps is already allocated
     if(currentTPSFound())
@@ -226,7 +255,7 @@ int tps_create(void)
     //private means that only this thread can access it
     //anonymous means no actual file by this name exists
     //Not sure if read/write protections are necessary 
-    new_tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    createPage(new_tps);
 
     //Check to see if allocation failed
     if(new_tps->memoryPage == MAP_FAILED)
@@ -250,6 +279,13 @@ int tps_destroy(void)
     1. Find tps for current thread
     2. Deallocate memory page
     3. Deallocate tps
+    */
+
+    /*
+    Phsae 2.3
+
+    Instead of deallocating memory, use destroyPage() to destroy the page.
+    If destroyPage() fails (returns -1), decrement the page's count.
     */
 
     //Make sure current thread has tps
@@ -297,6 +333,12 @@ int tps_read(size_t offset, size_t length, char *buffer)
     
     Before reading, change protection of memory page to allow read,
     then after reading, reset protection to not allow access
+    */
+
+    /*
+    Phase 2.3
+
+    
     */
 
  

@@ -81,10 +81,10 @@ static tps_t findCurrentTPS()
 
 
 //Create a page for given tps
-static void createPage(tps_t ptr)
+static void createPage(tps_t tps)
 {
     //Allocate memory
-    ptr->memoryPage = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    tps->memoryPage = mmap(NULL, TPS_SIZE, PROT_NONE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
 
     /*
     Phase 2.3
@@ -97,12 +97,17 @@ static void createPage(tps_t ptr)
 
 }
 
-/*
-//Destroy page for current tps
-static int destroyPage()
+
+//Destroy page for tps
+static int destroyPage(tps_t tps)
 {
 
-    
+    //Deallocate memory
+    munmap(tps->memoryPage, TPS_SIZE);
+
+        
+
+    /*
     Phase 2.3
     //If count for page is greater than 1, do not destroy it and return -1
 
@@ -111,9 +116,11 @@ static int destroyPage()
     //Deallocate the memory with munmap
 
     //Free the page
-     
+    */
+    
+    return 0; 
 }
-*/
+
 
 //Check if tps exists for tid
 static int TPSFound(unsigned long int tid)
@@ -297,9 +304,9 @@ int tps_destroy(void)
     //get tps pointer for current thread    
     tps_t tps = findCurrentTPS();
 
-    //free pointer to mem
-    munmap(tps->memoryPage, TPS_SIZE);
-    
+    //Destroy the page
+    destroyPage(tps);
+   
 
     //remove from queue
     int val = queue_delete(tpsqueue, tps);

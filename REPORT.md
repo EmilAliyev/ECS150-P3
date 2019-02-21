@@ -1,5 +1,6 @@
 #ECS 150 Project 3 Report
 Noah White
+
 Emil Aliyev
 
 ##Introduction
@@ -40,6 +41,8 @@ contains a memory page and a thread id associated with the TPS block. We use a
 global queue to store pointers to all of our TPS blocks. tps_init creates this
 queue.
 
+For phase 2.3, we changed the TPS structure slightly. The TPS structure now contains a tid, and a page struct. The page struct contains a pointer to the memory, and a count to keep track of how many TPSes are using the page. 
+
 ###TPS Helper Functions
 
 We have several helper functions used in our tps library, to handle accessing
@@ -48,5 +51,4 @@ the TPS block with a matching tid. findTPS takes a TID, calls queue_iterate with
 findTID and the TID as an arguement, and then returns a pointer to the TPS
 block. findCurrentTPS just calles findTPS with the current thread tid as the
 arguement. TPSfound and CurrentTPSfound both just check if a thread has a TPS
-associated with it or not. 
-
+associated with it or not. We also used helper functions when accessing the memory page of the tps. For instance, we used the helper function changeProtection() to change the protections of the page rather than calling mprotect () directly. We also used the getPage() function to return the memory page of the tps, rather than attempting to access the memory page directly inside other functions. By abstracting access to the memory in such a manner, we were able to accomodate the changes to the data structure in phase 2.3 by changing only a few lines of code. 

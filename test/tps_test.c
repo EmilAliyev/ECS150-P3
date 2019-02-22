@@ -8,12 +8,13 @@
 #include <sem.h>
 #include <tps.h>
 
-static sem_t sem1, sem2;
+static sem_t sem1, sem2, sem3;
 
 static char msg1[TPS_SIZE] = "Hello world\n";
 static char msg2[TPS_SIZE] = "hello world\n";
+static char msg3[TPS_SIZE] = "He3lo world\n";
 
-void *thread2(void *ptid)
+void *thread3(void *ptid)
 {
     char *buffer = malloc(TPS_SIZE);
 
@@ -25,27 +26,84 @@ void *thread2(void *ptid)
     memset(buffer, 0, TPS_SIZE);
     tps_read(0, TPS_SIZE, buffer);
     assert(!memcmp(msg1, buffer, TPS_SIZE));
-    printf("thread2: read OK!\n");
+    printf("thread3: read OK!\n");
 
-    /* Transfer CPU to thread 1 and get blocked */
-    sem_up(sem1);
-    sem_down(sem2);
+    /* Transfer CPU to thread 2 and get blocked */
+    sem_up(sem2);
+    sem_down(sem3);
 
     /* When we're back, read TPS and make sure it sill contains the original */
     memset(buffer, 0, TPS_SIZE);
     tps_read(0, TPS_SIZE, buffer);
     assert(!memcmp(msg1, buffer, TPS_SIZE));
-    printf("thread2: read OK!\n");
+    printf("thread3: post thread2 write, read OK!\n");
 
-    /* Transfer CPU to thread 1 and get blocked */
-    sem_up(sem1);
-    sem_down(sem2);
+    printf("Thread 3 Writes!!!\n");
+    buffer[0] = '3';
+    tps_write(2, 1, buffer);
+
+    /* Transfer CPU to thread 2 and get blocked */
+    sem_up(sem2);
+    sem_down(sem3);
+
+    /* Enusre message is still there */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!memcmp(msg3, buffer, TPS_SIZE));
+    printf("thread3: final read OK!\n");
 
     /* Destroy TPS and quit */
     tps_destroy();
     return NULL;
 }
 
+void *thread2()
+{
+    pthread_t tid;
+    char *buffer = malloc(TPS_SIZE);
+
+    /* Create thread 3 and get blocked */
+    pthread_create(&tid, NULL, thread3, NULL);
+    sem_down(sem2);
+
+    /* When we're back, clone thread 3's TPS */
+    tps_clone(tid);
+
+    /* Read the TPS and make sure it contains the original */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!memcmp(msg1, buffer, TPS_SIZE));
+    printf("thread2: read OK!\n");
+
+    /* Transfer CPU to thread 1*/
+    sem_up(sem1);
+    sem_down(sem2);
+   
+
+    printf("Thread 2 writes!!!!\n"); 
+    /* Modify TPS to cause a copy on write */
+    buffer[0] = 'h';
+    tps_write(0, 1, buffer);
+
+    /* Transfer CPU to thread 1 and get blocked */
+    sem_up(sem1);
+    sem_down(sem2);
+
+    /* When we're back, make sure our modification is still there */
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!strcmp(msg2, buffer));
+    printf("thread2: final read OK!\n");
+
+    /* Transfer CPU to thread 1 */
+    sem_up(sem1);
+
+    /* Wait for thread3 to die, and quit */
+    pthread_join(tid, NULL);
+    tps_destroy();
+
+    return NULL;
+}
 
 void *thread1()
 {
@@ -65,22 +123,28 @@ void *thread1()
     assert(!memcmp(msg1, buffer, TPS_SIZE));
     printf("thread1: read OK!\n");
 
-    /* Modify TPS to cause a copy on write */
-    buffer[0] = 'h';
-    tps_write(0, 1, buffer);
-
-    /* Transfer CPU to thread 2 and get blocked */
+    /*Transfer CPU ownership back to thread 2*/
     sem_up(sem2);
     sem_down(sem1);
 
-    /* When we're back, make sure our modification is still there */
+    /* Read the TPS again and make sure it contains the original */
     memset(buffer, 0, TPS_SIZE);
     tps_read(0, TPS_SIZE, buffer);
-    assert(!strcmp(msg2, buffer));
-    printf("thread1: read OK!\n");
+    assert(!memcmp(msg1, buffer, TPS_SIZE));
+    printf("thread1: post-thread2 write, read OK!\n");
 
-    /* Transfer CPU to thread 2 */
-    sem_up(sem2);
+    /* Transfer CPU to thread 3 and get blocked */
+    sem_up(sem3);
+    sem_down(sem1);
+
+    /* When we're back, make sure thread 1 is the only original*/
+    memset(buffer, 0, TPS_SIZE);
+    tps_read(0, TPS_SIZE, buffer);
+    assert(!strcmp(msg1, buffer));
+    printf("thread1: final read OK!\n");
+
+    /* Transfer CPU to thread 3 */
+    sem_up(sem3);
 
     /* Wait for thread2 to die, and quit */
     pthread_join(tid, NULL);
@@ -175,29 +239,14 @@ void test_write()
     test_write2();
 }
 
-//Test tps already exists error
-void test_clone2()
-{
-
-    
-}
-
 //Test tid not found error
-void test_clone1()
+void test_clone()
 {
     printf("Cloning test 1... TID not found test\n");
 
     assert(tps_clone(100) == -1);
 
     printf("Success!\n");
-}
-
-
-//Basic clone test
-void test_clone()
-{
-    test_clone1();
-    test_clone2();
 }
 
 //Init test - must return -1 if called for second time
@@ -260,12 +309,14 @@ void comp_test()
     //maybe move all this to an expanded testing fn?
     sem1 = sem_create(0);
     sem2 = sem_create(0);
-
+    sem3 = sem_create(0);
+    
     pthread_create(&tid, NULL, thread1, NULL);
     pthread_join(tid, NULL);
 
     sem_destroy(sem1);
     sem_destroy(sem2);   
+    sem_destroy(sem3);   
 }
 
 int main()
